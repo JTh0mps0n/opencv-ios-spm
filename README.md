@@ -9,10 +9,10 @@ An **unofficial** Swift Package that distributes a prebuilt `opencv2.xcframework
 
 ## Use
 
-In Xcode: File > Add Package Dependencies, enter `https://github.com/JTh0mps0n/opencv-ios-spm`, and add the `opencv2` product to your target. Or in `Package.swift`:
+In Xcode: File > Add Package Dependencies, enter `https://github.com/JTh0mps0n/opencv-ios-spm`, and add the `OpenCV` product to your target. Or in `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/JTh0mps0n/opencv-ios-spm", exact: "4.12.0-1")
+.package(url: "https://github.com/JTh0mps0n/opencv-ios-spm", exact: "4.12.0-2")
 ```
 
 Then `#import <opencv2/opencv2.h>` from Objective-C or a bridging header.
@@ -27,7 +27,7 @@ python3 src/platforms/apple/build_xcframework.py -o out \
   --iphoneos_archs arm64 --iphonesimulator_archs arm64 --build_only_specified_archs
 ```
 
-The script emits macOS-style "deep" frameworks (`Versions/A/...`) whose binaries are static archives inside a single-architecture fat wrapper. iOS needs shallow frameworks, and Xcode only treats a binary as static, and so skips embedding it, when it is a plain archive. The compiled code is repackaged unchanged:
+The script emits macOS-style "deep" frameworks (`Versions/A/...`), which iOS rejects: an iOS framework has `Info.plist` at its root. Its binaries are static archives inside a single-architecture fat wrapper, which the repackaging below thins to plain archives. The compiled code is otherwise unchanged. The package's `OpenCV` library product is declared `.static`, over a stub source target that depends on the binary, so Xcode links the archive directly. A product made of a binary target alone cannot be static, and Xcode would wrap it in an embedded dynamic framework that the iOS installer rejects.
 
 ```sh
 for slice in ios-arm64 ios-arm64-simulator; do
