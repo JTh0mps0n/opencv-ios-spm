@@ -10,8 +10,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "opencv2",
-            url: "https://github.com/JTh0mps0n/opencv-ios-spm/releases/download/4.12.0/opencv2.xcframework.zip",
-            checksum: "df3597bbe4f4eed0f143a60100f0e328ae0175e0fde71b1ad250dc7e757ddca0"
+            url: "https://github.com/JTh0mps0n/opencv-ios-spm/releases/download/4.12.0-1/opencv2.xcframework.zip",
+            checksum: "68fe3adc02d20fef133cbfd340c19fd03d57fc0388c01d965f54954966584a83"
         )
     ]
 )
