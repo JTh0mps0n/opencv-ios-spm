@@ -5,14 +5,13 @@ let package = Package(
     name: "opencv-ios-spm",
     platforms: [.iOS(.v17)],
     products: [
-        .library(name: "OpenCV", type: .static, targets: ["OpenCV"])
+        .library(name: "opencv2", targets: ["opencv2"])
     ],
     targets: [
-        .target(name: "OpenCV", dependencies: ["opencv2"]),
         .binaryTarget(
             name: "opencv2",
-            url: "https://github.com/JTh0mps0n/opencv-ios-spm/releases/download/4.12.0-2/opencv2.xcframework.zip",
-            checksum: "68fe3adc02d20fef133cbfd340c19fd03d57fc0388c01d965f54954966584a83"
+            url: "https://github.com/JTh0mps0n/opencv-ios-spm/releases/download/4.12.0-3/opencv2.xcframework.zip",
+            checksum: "bcbed05a6d89005db2e9dfee04d1b3efea5d822898ed95424f4eef9c317af005"
         )
     ]
 )

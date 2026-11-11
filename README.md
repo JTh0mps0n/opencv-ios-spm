@@ -9,10 +9,10 @@ An **unofficial** Swift Package that distributes a prebuilt `opencv2.xcframework
 
 ## Use
 
-In Xcode: File > Add Package Dependencies, enter `https://github.com/JTh0mps0n/opencv-ios-spm`, and add the `OpenCV` product to your target. Or in `Package.swift`:
+In Xcode: File > Add Package Dependencies, enter `https://github.com/JTh0mps0n/opencv-ios-spm`, and add the `opencv2` product to your target. Or in `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/JTh0mps0n/opencv-ios-spm", exact: "4.12.0-2")
+.package(url: "https://github.com/JTh0mps0n/opencv-ios-spm", exact: "4.12.0-3")
 ```
 
 Then `#import <opencv2/opencv2.h>` from Objective-C or a bridging header.
@@ -27,7 +27,11 @@ python3 src/platforms/apple/build_xcframework.py -o out \
   --iphoneos_archs arm64 --iphonesimulator_archs arm64 --build_only_specified_archs
 ```
 
-The script emits macOS-style "deep" frameworks (`Versions/A/...`), which iOS rejects: an iOS framework has `Info.plist` at its root. Its binaries are static archives inside a single-architecture fat wrapper, which the repackaging below thins to plain archives. The compiled code is otherwise unchanged. The package's `OpenCV` library product is declared `.static`, over a stub source target that depends on the binary, so Xcode links the archive directly. A product made of a binary target alone cannot be static, and Xcode would wrap it in an embedded dynamic framework that the iOS installer rejects.
+The compiled code is repackaged with three changes, because the script's output does not install on iOS as is:
+
+- The script emits macOS-style "deep" frameworks (`Versions/A/...`). An iOS framework keeps `Info.plist` at its root, so the contents are flattened.
+- The binaries are static archives inside a single-architecture fat wrapper; they are thinned to plain archives.
+- Xcode embeds a static framework by replacing its binary with a stub, and the iOS installer requires the framework's `Info.plist` to name its executable. OpenCV's does not, so `CFBundleExecutable` is added.
 
 ```sh
 for slice in ios-arm64 ios-arm64-simulator; do
@@ -37,6 +41,7 @@ for slice in ios-arm64 ios-arm64-simulator; do
   cp -R "$from/Headers" "$from/Modules" "$to/"
   cp "$from/Resources/Info.plist" "$from/Resources/PrivacyInfo.xcprivacy" "$to/"
   lipo "$from/opencv2" -thin arm64 -output "$to/opencv2"
+  /usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string opencv2" "$to/Info.plist"
 done
 xcodebuild -create-xcframework \
   -framework flat/ios-arm64/opencv2.framework \
