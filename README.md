@@ -24,7 +24,22 @@ Built on macOS with Xcode 26.3 (17C529), CMake 3.28.1 and Python 3.14, from a sh
 git clone --depth 1 --branch 4.12.0 https://github.com/opencv/opencv.git src
 python3 src/platforms/apple/build_xcframework.py -o out \
   --iphoneos_archs arm64 --iphonesimulator_archs arm64 --build_only_specified_archs
-ditto -c -k --keepParent out/opencv2.xcframework opencv2.xcframework.zip
+
+# The script emits macOS-style "deep" frameworks (Versions/A/...). iOS requires
+# shallow frameworks, so repackage the same compiled binaries unchanged.
+for slice in ios-arm64 ios-arm64-simulator; do
+  from="out/opencv2.xcframework/$slice/opencv2.framework/Versions/A"
+  to="flat/$slice/opencv2.framework"
+  mkdir -p "$to"
+  cp -R "$from/Headers" "$from/Modules" "$to/"
+  cp "$from/opencv2" "$from/Resources/Info.plist" "$from/Resources/PrivacyInfo.xcprivacy" "$to/"
+done
+xcodebuild -create-xcframework \
+  -framework flat/ios-arm64/opencv2.framework \
+  -framework flat/ios-arm64-simulator/opencv2.framework \
+  -output flat/opencv2.xcframework
+
+ditto -c -k --keepParent flat/opencv2.xcframework opencv2.xcframework.zip
 swift package compute-checksum opencv2.xcframework.zip
 ```
 
